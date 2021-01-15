@@ -1,18 +1,18 @@
-
+const $id = (id) => document.getElementById(id);
+const $name = (name) => document.getElementsByName(name);
+const $c = (c) => document.getElementsByClassName(c);
+const $q = (query) => document.querySelectorAll(query);
 
 /* 盤面を出力 */
 var printb = function(b, scale)
 {
     if (typeof(scale) == "undefined") scale = 10;
     if (scale == 0) {
-        var ret = "";
-        for (var i=0; i<5; i++) ret += b.substr(i * 4, 4) + "\n";
-        return (ret);
+        return [...Array(5)].map((v,i) => b.slice(i * 4, i * 4 + 4)).join("\n");
     }
     
-    var ret = '<div class="board">';
-    b.split("").forEach(function(c,pos) {
-        if (c == "_" || c== " ") return;
+    return '<div class="board">' + b.split("").map((c, pos) => {
+        if (c == "_" || c== " ") return "";
         //ピースの場所
         var x0 = (pos % 4) * scale;
         var y0 = parseInt(pos / 4) * scale;
@@ -30,10 +30,10 @@ var printb = function(b, scale)
         style.push("left:" + x0 + "px");
         style.push("top:" + y0 + "px");
         style.push("background-color:" + size[c].c);
-        ret += '<div class="piece" style="' + style.join(";") + '"></div>';
-    });
 
-    return ret + "</div>";
+        return '<div class="piece" style="' + style.join(";") + '"></div>';
+
+    }).join("") + "</div>";
 };
 
 // pos番目のピースをdir方向に動かす。
@@ -55,7 +55,8 @@ var dir_block = function(st, pos, dir)
     4: {w:2, h:2},
     };
 
-    var c = b.substr(pos, 1);
+    var c = b[pos];
+    if (b[pos] == "_") return;
     var h = size[c].h;
     var w = size[c].w;
 
@@ -83,10 +84,10 @@ var dir_block = function(st, pos, dir)
     return {count:(st.count + 1), b:b, pos: [x0, y0], dir: dir};
 }
 
-var Solver = function (board) {
+const Solver = function (board) {
     
     /* 比較用の盤面を生成 */
-    var make_board_for_compare = function(b)
+    const make_board_for_compare = function(b)
     {
         //ビット配列にしてみる(3ビット*20)
         //空0 小1 横2 縦3 大4
@@ -124,7 +125,7 @@ var Solver = function (board) {
 
     // xが新盤面ならリストに追加、そうでなければ何もしない
     // xがgoalならば履歴を出力し、program終了
-    var check_append = function(x)
+    const check_append = function(x)
     {
         if (x == null) return;
         
@@ -146,11 +147,11 @@ var Solver = function (board) {
 
         // ゴール
         var x = db.pop();
-        $("#solve").prop("disabled", false);
-        $("#dbb").html("【検索結果】<div>(" + x.count + "手)</div>");
+        $id("solve").disabled = false;
+        $id("dbb").innerHTML = ("【検索結果】<div>(" + x.count + "手)</div>");
         while (x.parent != null) {
             var b = dbb[x.id];
-            $("#dbb div:first").before("<div class='step'>" + printb(b) + "</div>");
+            $q("#dbb div")[0].innerHTML += ("<div class='step'>" + printb(b) + "</div>");
             var id = x.parent;
             x = db[id];
         }
@@ -158,7 +159,7 @@ var Solver = function (board) {
     };
 
     // st内ブロックを動かしてできる新盤面をリストに追加する
-    var move_all_blocks = function(st)
+    const move_all_blocks = function(st)
     {
         st.b = dbb[st.id];
         st.b.split("").forEach(function(p, i) {
@@ -189,11 +190,11 @@ var Solver = function (board) {
                 move_all_blocks(db[i]);
             
                 if (db.length <= i + 1) {
-                    $("#dbb").html("solution not found");
+                    $id("dbb").innerHTML = ("solution not found");
                     return;
                 }
             }
-            $("#dbb").append(count +" steps, " + i + " patterns<br/>");
+            $id("dbb").append(count +" steps, " + i + " patterns\n");
         
             setTimeout(function() {
                     stepwise_search();
@@ -203,8 +204,8 @@ var Solver = function (board) {
     };
 };
 
-$(function()
-{
+window.onload = () => {
+    var board;
     var qs = [
         "34 3"+"    "+"3113"+" 11 "+"1__1",
         "14 1"+"1  1"+"2 2 "+"2 2 "+"1__1",
@@ -222,43 +223,50 @@ $(function()
     var clickmove = function(e, $piece) {
         console.log(e);
         if ($piece == undefined)
-        $piece = $(this);
-        var y = parseInt($piece.css("top"));
-        var x = parseInt($piece.css("left"));
-        var w = parseInt($piece.css("width"));
-        var h = parseInt($piece.css("height"));
+            $piece = this;
+        var y = parseInt($piece.style["top"]);
+        var x = parseInt($piece.style["left"]);
+        var w = parseInt($piece.style["width"]);
+        var h = parseInt($piece.style["height"]);
         var st = {b:board, count:0};
         var pos = (x + y * 4) / 50;
 
-        var $dir = $piece.find(".selected");
+        var $dir = $piece.getElementsByClassName("selected")[0];
 
         var dir = [];
-        if($dir.hasClass("u")) dir = [0, -1];
-        if($dir.hasClass("d")) dir = [0, 1];
-        if($dir.hasClass("l")) dir = [-1, 0];
-        if($dir.hasClass("r")) dir = [1, 0];
+        if($dir.classList.contains("u")) dir = [0, -1];
+        if($dir.classList.contains("d")) dir = [0, 1];
+        if($dir.classList.contains("l")) dir = [-1, 0];
+        if($dir.classList.contains("r")) dir = [1, 0];
         var tmp = dir_block(st, pos, dir);
 
         if (tmp == null) {
             console.log("no"); return;
         }
         board = tmp.b;
-        $("#inplay").html(printb(board, 50));
+        $id("inplay").innerHTML = (printb(board, 50));
+        console.log(board);
+        if (board[13] == "4") {
+            console.log("clear");
+            $id("inplay").innerHTML += '<div style="position:absolute; width:100px; height:100px; left:35px; top:180px; font-size:30px;transform:rotate(30deg);">CLEAR</div>';
+            return;
+        }
         addclickevents();
-        $("#menu").hide();
+        $id("menu").style.display = "none";
     };
 
 
     var addclickevents = function() {
-        //console.log(board);
         var st = {b:board, count:0};
 
         var ret = '<div class="l">←</div><div class="r">→</div>'
-                + '<div class="u">↑</div><div class="d">↓</div>';
+            + '<div class="u">↑</div><div class="d">↓</div>';
+        var ret = '<div class="l"></div><div class="r"></div>'
+            + '<div class="u"></div><div class="d"></div>';
         
-        $("#inplay .piece").each(function(idx) {
-            var y = parseInt($(this).css("top"));
-            var x = parseInt($(this).css("left"));
+        [...$q("#inplay .piece")].map(($dom, idx) => {
+            var y = parseInt($dom.style["top"]);
+            var x = parseInt($dom.style["left"]);
             var pos = (x + y * 4) / 50;
             var movable = [];
 
@@ -273,65 +281,134 @@ $(function()
 
             if (movable.length == 0) return;
 
-            $(this).append(ret).hover(null, function(){ $(this).children("div").hide(); }).click(clickmove);
+            $dom.innerHTML += (ret);
+            
+            if (movable.length == 1) {
+                $dom.onclick = (e) => {
+                    $dom.getElementsByClassName(movable[0])[0].classList.add("selected");
+                    clickmove(e, $dom);
+                };
+            }
+            
+            if(0)
+            $dom.onmousedown = (e) => {
+                console.log("down");
+                if (movable.length == 1) {
+                    $dom.getElementsByClassName(movable[0])[0].classList.add("selected");
+                    return clickmove("", $dom);
+                }
+                let pos0 = [e.clientX, e.clientY];
+                let dom0 = [$dom.style.left, $dom.style.top];
+                let drag = (e) => {
+                    let pos = [e.clientX, e.clientY];
+                    let diff = [pos[0] - pos0[0], pos[1] - pos0[1]];
+                    //if (Math.abs(diff[0]) < 10 && Math.abs(diff[1]) < 10) return;
+                    let mov = (diff[0] < 0 ? "l" : "r") + (diff[1] < 0 ? "u" : "d");
+                    console.log(diff);
+                    let dir = movable.filter(v => mov.indexOf(v) != -1);
+                    if (dir.length == 0) return;
+                    if (dir.length == 1) dir = dir[0];
+                    if (dir.length == 2) {
+                        dir = Math.abs(diff[0]) < Math.abs(diff[1]) ? dir[1] : dir[0]; 
+                    }
+                    $dom.getElementsByClassName(dir)[0].classList.add("selected");
+                    console.log(dir);
+                    if (dir=="u" || dir == "d") {
+                        $dom.style.left = dom0[0];
+                        $dom.style.top = (pos[1]) + "px";
+                    }
+                    if (dir=="r" || dir == "l") {
+                        $dom.style.top = dom0[1];
+                        $dom.style.left = (pos[0]) + "px";
+                    }
+                    //var width = $dom.offsetWidth;
+
+                    //$dom.style.top = (y-height/2) + "px";
+                    //$dom.style.left = (x-width/2) + "px";
+                };
+                document.onmousemove = (e) => {
+                    var x = e.pageX - $dom.offsetLeft;
+                    var y = e.pageY - $dom.offsetTop;
+                    //var dir = (x,y);
+                    console.log(e.clientX,e.clientY,$dom.offsetLeft, $dom.offsetTop);
+                    var tmp = dir_block(st, pos, [0,-1]);
+                    //console.log(tmp);
+                };
+                //drag;
+                document.onmouseup = (e) => {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                    drag(e);
+                    $dom.style.left = dom0[0];
+                    $dom.style.top = dom0[1];
+                    //console.log("up");
+                    [...$dom.children].map($cdom => console.log($cdom.classList));
+                    if ([...$dom.children].some($cdom => $cdom.classList.contains("selected")))
+                        clickmove("", $dom);
+
+                    //document.removeEventListener("mousemove", drag);
+                };
+            };
+            if(1)
+            movable.map(v => {
+                [...$dom.getElementsByClassName(v)].map($cdom => {
+                    $cdom.style.display = "block";
+                    $cdom.onclick = (e) => {
+                        $cdom.classList.add("selected");
+                        clickmove(e, $dom);
+                    };
+                });
+
+            });
+            /*            return;
+
             //1方向のみ
             if (movable.length == 1) {
-                $(this).mousemove(function() {
-                        $(this).find("." + movable[0]).show().addClass("selected");
+                //$dom.onmousemove = function() {
+                    [...$dom.getElementsByClassName(movable[0])].map($cdom => {
+                        $cdom.classList.add("selected");
+                        $cdom.style.display = "block";
                     });
+                //};
+                //[...$dom.children].map($cdom => 
                 return;
             }
+            */
+            if (movable.length == 1) return;
+
             //2方向に動かせる場合
-            var w = $(this).width();
-            var h = $(this).height();
-            var avil = movable.join("");
+            var w = $dom.offsetWidth;
+            var h = $dom.offsetHeight;
 
-            if (avil == "dr")
-                var direction = function(x, y) {
-                    return ((x/w < y/h) ? ".d" : ".r");
-                };
+            let direction = {
+                dr: (x, y) => ((x/w < y/h) ? "d" : "r"),
+                ul: (x, y) => ((x/w < y/h) ? "l" : "u"),
+                ur: (x, y) => ((x/w + y/h < 1) ? "u" : "r"),
+                dl: (x, y) => ((x/w + y/h < 1) ? "l" : "d"),
+                lr: (x, y) => ((x < w/2) ? "l" : "r"),
+                ud: (x, y) => ((y < h/2) ? "u" : "d"),
+            }[movable.join("")];
 
-            if (avil == "ul")
-                var direction = function(x, y) {
-                    return ((x/w < y/h) ? ".l" : ".u");
-                };
+            $dom.onclick = function(e) {
+                var dompos = $dom.getBoundingClientRect();
+                var posX = dompos.left + window.pageXOffset;
+                var posY = dompos.top + window.pageYOffset;
 
-            if (avil == "ur")
-                var direction = function(x, y) {
-                    return ((x/w + y/h < 1) ? ".u" : ".r");
-                };
-
-            if (avil == "dl")
-                var direction = function(x, y) {
-                    return ((x/w + y/h < 1) ? ".l" : ".d");
-                };
-
-            if (avil == "lr")
-                var direction = function(x, y) {
-                    return ((x < w/2) ? ".l" : ".r");
-                };
-
-            if (avil == "ud")
-                var direction = function(x, y) {
-                    return ((y < h/2) ? ".u" : ".d");
-                };
-
-            $(this).mousemove(function(e) {
-                var offset = $(this).offset();
-                var x = e.pageX - offset.left;
-                var y = e.pageY - offset.top;
-
-                $(this).find("." + movable[0] + ", ." + movable[1]).show().removeClass("selected");
-                $(this).find(direction(x, y)).addClass("selected");
-            });
+                var x = e.pageX - posX;
+                var y = e.pageY - posY;
+                $dom.getElementsByClassName(direction(x, y))[0].classList.add("selected");
+                clickmove(e, $dom);
+            };
         });
     };
 
-    var load_quiz = function(qid) {
+    const load_quiz = (qid) => {
         board = qs[qid];
-        $("#menu, #dbb").hide();
-        $("#dispmenu").show();
-        $("#inplay").show().html(printb(board, 50));
+        $id("menu").style.display = "none";
+        $id("dbb").style.display = "none";
+        $id("dispmenu").style.display = "";
+        $id("inplay").style.display = "block";
+        $id("inplay").innerHTML = (printb(board, 50));
         addclickevents();
         /*
         $(document).unbind().mouseup(function(e) {
@@ -350,35 +427,35 @@ $(function()
                 clickmove(dir, $piece);
             });
         */
-        $("#solve").show().unbind().click(function(e) {
-            $("#dbb").show().html("【検索中】");
-            $(this).prop("disabled", true);
+        $id("solve").style.display = "";
+        $id("solve").onclick = function(e) {
+            $id("dbb").style.display = "";
+            $id("dbb").innerHTML = ("【検索中】");
+            $id("solve").disabled = true;
             var cal = new Solver(board);
             cal.start_search();
-        });
+        };
     };
 
     var show_menu = function() {
-        $("#menu").html("【問題一覧】");
-        qs.forEach(function(b) {
-           $("#menu").append("<div class='option'>");
-           $("#menu div:last").append(printb(b));
+        $id("menu").innerHTML = ("【問題一覧】");
+        qs.forEach((b) => {
+            let $div = document.createElement("div");
+            $div.classList.add("option");
+            $div.innerHTML = printb(b);
+            $id("menu").appendChild($div);
         });
-        $("#menu").append("<hr>");
-        $("#menu .option").click(function() {
-             var n = $("#menu .option").index($(this));
-             load_quiz(n);
-        });
-        $("#dispmenu").hide().unbind().click(function() {
-            $("#menu").show();
-        });
-        $("#solve").hide();
+        $id("menu").innerHTML += ("<hr>");
+        [...$q("#menu .option")].map(($dom, i) => $dom.onclick = () => load_quiz(i));
+        $id("dispmenu").style.display = "none";
+        $id("dispmenu").onclick = () => { $id("menu").style.display = ""};
+        $id("solve").style.display = "none";
     };
 
     show_menu();
 
-    $("#sank").hover(function() {console.log("sank")});
-    //$("#sikak").click(function() {console.log("sikak")});
+    //$id("sank").onhover = (function() {console.log("sank")});
+    //$id("sikak").click(function() {console.log("sikak")});
 
-});
+};
 

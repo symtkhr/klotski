@@ -2,9 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script src="jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="hako2-1.js"></script>
 <style>
+  body {
+  width: 480px;
+  }
 #dbb .step , #menu .option {
  display:inline-block;
  border:1px solid gray;
@@ -51,29 +53,45 @@ cursor:pointer;
 }
 
 .l {
-left:0;
-top:0;
-bottom:0;
-line-height:50px;
+left:-10px;
+top:15px;
+border-right:  20px solid black;
+border-top:    10px solid transparent;
+border-bottom: 10px solid transparent;
 }
 
 .r {
-right:0;
-top:0;
+right:-10px;
+top:15px;
+border-left:   20px solid black;
+border-top:    10px solid transparent;
+border-bottom: 10px solid transparent;
 bottom:0;
-line-height:50px;
 }
-
+.u,.d,.l,.r{
+width:0;
+height:0;
+//border:1px solid red;
+}
 .u {
-width:100%;
+border-right:  10px solid transparent;
+border-left:   10px solid transparent;
+border-bottom: 20px solid black;
+left:15px;
 text-align:center;
-top:0;
+top:-10px;
 }
 
 .d {
-width:100%;
+border-top:    20px solid black;
+border-right:  10px solid transparent;
+border-left:   10px solid transparent;
+left:15px;
 text-align:center;
-bottom:0;
+bottom:-10px;
+}
+.piece:hover div {
+color:red;
 }
 
 #inplay div .selected {
