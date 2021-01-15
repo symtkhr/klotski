@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="hako2-1.js"></script>
+<style>
+#dbb .step , #menu .option {
+ display:inline-block;
+ border:1px solid gray;
+ margin: 5px 0 0 5px;
+}
+div.piece {
+  position:absolute;
+  box-sizing:border-box;
+  border: 1px solid gray;
+}
+div.board {
+  position:relative;
+  width:40px;
+  height:50px;
+}
+#inplay {
+  display:none;
+  border: 5px solid #ccc;
+  width:200px;
+  height:250px;
+  position:relative;
+}
+#inplay::after {
+  content: '';
+  display: block;
+  position:absolute;
+  width:100px;
+  height:5px;
+  background-color:white;
+  bottom:-5px;
+  left: 50px;
+}
+.l, .r, .u, .d {
+width:25px; height:25px;
+position:absolute;
+font-size: 25px;
+
+color: black;
+opacity: .2;
+display:none;
+line-height:25px;
+cursor:pointer;
+//border:solid red 1px;
+}
+
+.l {
+left:0;
+top:0;
+bottom:0;
+line-height:50px;
+}
+
+.r {
+right:0;
+top:0;
+bottom:0;
+line-height:50px;
+}
+
+.u {
+width:100%;
+text-align:center;
+top:0;
+}
+
+.d {
+width:100%;
+text-align:center;
+bottom:0;
+}
+
+#inplay div .selected {
+opacity:1;
+font-weight:bold;
+}
+
+</style>
+</head>
+<body class="content">
+  <div id="menu"></div>
+  <div id="inplay"></div>
+  <hr>
+  <input type="button" id="dispmenu" value="問題一覧">
+  <input type="button" id="solve" value="解答検索">
+  <div id="dbb"></div>
+</body>
+</html>
