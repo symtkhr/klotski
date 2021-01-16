@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="text/javascript" src="klotski.js"></script>
+<title>Klotski</title>
+
+<style>
+#solve .step , #menu .option {
+ display:inline-block;
+ border:1px solid gray;
+ margin: 5px 0 0 5px;
+}
+div.piece {
+  position:absolute;
+  box-sizing:border-box;
+  border: 1px solid gray;
+}
+div.board {
+  position:relative;
+  width:40px;
+  height:50px;
+}
+#inplay {
+  display:none;
+  border: 5px solid #ccc;
+  min-width:200px;
+  height:250px;
+  margin: 5px;
+  position:relative;
+}
+#inplay:after {
+    content: '';
+    display: block;
+    position:absolute;
+    width:100px;
+    height:5px;
+    background-color:white;
+    bottom:-5px;
+    left: 50px;
+}
+.l, .r, .u, .d {
+    width:25px; height:25px;
+    position:absolute;
+    font-size: 25px;
+    
+    color: black;
+    opacity: .2;
+    display:none;
+    line-height:25px;
+    cursor:pointer;
+    //border:solid red 1px;
+}
+
+.l {
+    left:-10px;
+    top:15px;
+    border-right:  20px solid black;
+    border-top:    10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+
+.r {
+    right:-10px;
+    top:15px;
+    border-left:   20px solid black;
+    border-top:    10px solid transparent;
+    border-bottom: 10px solid transparent;
+    bottom:0;
+}
+.u,.d,.l,.r{
+    width:0;
+    height:0;
+    //border:1px solid red;
+}
+.u {
+    border-right:  10px solid transparent;
+    border-left:   10px solid transparent;
+    border-bottom: 20px solid black;
+    left:15px;
+    text-align:center;
+    top:-10px;
+}
+
+.d {
+    border-top:    20px solid black;
+    border-right:  10px solid transparent;
+    border-left:   10px solid transparent;
+    left:15px;
+    text-align:center;
+    bottom:-10px;
+}
+.piece:hover div {
+    color:red;
+}
+#menu .option {
+    cursor:pointer;
+}
+#inplay div .selected {
+    opacity:1;
+    font-weight:bold;
+}
+.topbox {
+    border-radius:10px;
+    margin: 10px;
+    border: 1px solid #950;
+    text-align:left;
+    padding:5px;
+    position:relative;
+    background-color:white;
+}
+span.minimized {
+    border: 1px solid #950;
+    background-color: #dca;
+    cursor:pointer;
+    margin:5px;
+    border-radius:20px;
+    border: 1px solid #ccc;
+    padding: 0 6px;
+    margin: 0px;
+    font-weight: normal;
+    background-color: #fdc;
+    display: none;
+}
+h1 {
+    margin:2px;
+    font-size:14pt;
+    border-bottom:1px solid #cdf;
+}
+
+h2 {
+    margin:2px;
+    background-color: #dca;
+    font-size:12pt;
+}
+
+#solve {
+    display: none;
+}
+
+#solvelog {
+    font-size:10px;
+    max-height:200px;
+    overflow-y:scroll;
+}
+footer {
+    text-align:right;
+}
+#game {
+  display:flex;
+  width:500px;
+}
+
+</style>
+</head>
+<body class="content">
+  <h1>箱入り娘</h1>
+  <div id="game">
+    <div id="inplay"></div>
+    <div>
+      <span class="minimized" id="showmenu">問題一覧</span>
+      <div class="topbox" id="menu"></div>
+    </div>
+  </div>
+  <div class="topbox" id="solve"></div>
+  <span class="minimized" id="showsolve">解答検索</span>
+  <hr/>
+  <footer>Released: 2021-01-16</footer>
+</body>
+</html>
